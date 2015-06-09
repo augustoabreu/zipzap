@@ -4,7 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, height=device-height, user-scalable=no, initial-scale=1.0">
   <title>Zip Zap</title>
-  <link rel="stylesheet" href="styles/style.min.css"></head>
+  <link rel="stylesheet" href="styles/style.min.css">
+  <!-- build:remove:prod -->
+  <script src="http://localhost:35729/livereload.js"></script>
+  <!-- /build -->
+</head>
 
 <body>
 
@@ -27,7 +31,6 @@
             ZipZap
         </h1>
       </label>
-      </a>
       <div class="app-difficulty">Nível <span class="app-difficulty-num">1</span></div>
       <ul class="app-menu">
         <li class="app-menu-item">
@@ -42,12 +45,13 @@
         </li>
       </ul>
     </header>
+
     <section class="game-container">
       <div class="matrix-wrap">
       </div>
     </section>
   </div>
 
-  <script src="scripts/app.min.js"></script>
+  <script src="scripts/app.js"></script>
 </body>
 </html>

@@ -812,6 +812,9 @@
    */
       $app = null,
 
+  /**
+   *  @desc hash for store keys on Config.set()
+   */
       sessionHash = null,
 
   /**
@@ -1530,6 +1533,7 @@
    */
   $private.onWindowLoad = function onWindowLoad() {
     console.log('Window loaded event on LoadModule');
+    console.log($pr.init);
   };
 
   /**
