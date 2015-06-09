@@ -1,0 +1,26 @@
+{
+  "name": "ZipZap",
+  "version": "2.0.0",
+  "description": "A simple game of sorting tiles!",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": {
+    "name": "Augusto Abreu",
+    "email": "guto@live.ca",
+    "url": "http://augustoabreu.com.br"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "stylus": "~0.51.0",
+    "grunt": "~0.4.5",
+    "grunt-contrib-jshint": "~0.11.2",
+    "grunt-contrib-uglify": "~0.5.0",
+    "grunt-contrib-stylus": "~0.21.0",
+    "grunt-contrib-cssmin": "~0.12.3",
+    "grunt-contrib-concat": "~0.5.1",
+    "grunt-contrib-watch": "~0.6.1",
+    "grunt-processhtml": "~0.3.7"
+  }
+}

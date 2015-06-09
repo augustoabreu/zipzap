@@ -1,0 +1,62 @@
+* {
+  box-sizing: border-box;
+  font-family: 'sans-serif';
+  font-size: 16px;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  margin: 0;
+}
+
+.main-container {
+  width: 615px;
+  margin: 0 auto;
+}
+
+.main-header {
+  background: #000;
+  color: #fff;
+  padding: 10px;
+}
+
+.moviments-counter {
+  float: right;
+  color: #fff;
+  padding: 3px;
+}
+
+.moviments {
+  display: inline-block;
+  width: 50px;
+  text-align: right;
+}
+
+.moviments,
+.moviments-counter {
+  font-size: 12px;
+}
+
+.matrix-line {
+  width: 100%;
+  display: table;
+  margin-top: 5px;
+}
+
+.matrix-box {
+  cursor: move;
+  width: 150px;
+  height: 150px;
+  background: #000;
+  float: left;
+  margin-right: 5px;
+  color: #fff;
+  text-align: center;
+  line-height: 150px;
+  font-size: 42px;
+}
+
+.matrix-box:last-child {
+  margin-right: 0;
+}

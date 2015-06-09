@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, height=device-height, user-scalable=no, initial-scale=1.0">
+  <title>Zip Zap</title>
+  <link rel="stylesheet" href="styles/style.min.css"></head>
+
+<body>
+
+  <div class="app-modal hidden">
+    <div class="app-modal-overlay"></div>
+    <div class="app-modal-container pad curved-2x">
+      <div class="app-modal-close-btn">×</div>
+      <div class="app-modal-title"></div>
+      <div class="app-modal-content"></div>
+      <div class="app-modal-footer"></div>
+    </div>
+  </div>
+
+  <div class="app-wrapper invisible">
+    <header class="app-header">
+      <div class="moviments-counter"><span class="moviments">0</span> movimentos</div>
+      <input type="checkbox" class="open-menu hide" id="open_menu" name="open_menu">
+      <label for="open_menu" class="app-title-label">
+        <h1 class="app-title">
+            ZipZap
+        </h1>
+      </label>
+      </a>
+      <div class="app-difficulty">Nível <span class="app-difficulty-num">1</span></div>
+      <ul class="app-menu">
+        <li class="app-menu-item">
+          <a href="#" class="app-menu-link">
+            Instruções
+          </a>
+        </li>
+        <li class="app-menu-item">
+          <a href="#" class="app-menu-link">
+            Sobre o jogo
+          </a>
+        </li>
+      </ul>
+    </header>
+    <section class="game-container">
+      <div class="matrix-wrap">
+      </div>
+    </section>
+  </div>
+
+  <script src="scripts/app.min.js"></script>
+</body>
+</html>
