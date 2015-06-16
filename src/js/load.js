@@ -25,10 +25,6 @@
    *  @desc init load flow
    */
   $private.init = function init() {
-    Config.init();
-    Modal.init();
-    Setup.init();
-    // App.init();
     $pr.setupEvents();
   };
 
@@ -40,10 +36,12 @@
   };
 
   /**
-   *  @desc handle window load event
+   *  @desc handle window load event and initiate all modules
    */
   $private.onWindowLoad = function onWindowLoad() {
-    console.log('Window loaded event on LoadModule');
+    Config.init();
+    Modal.init();
+    Setup.init();
   };
 
   /**

@@ -72,7 +72,7 @@
   };
 
   /**
-   *  @desc pprepare Setup to handle tutorial flow if was already viewed or not
+   *  @desc prepare Setup to handle tutorial flow if was already viewed or not
    *        and calculate the maximum difficulty of the app.
    */
   $private.prepare = function prepare() {

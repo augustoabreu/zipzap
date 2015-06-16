@@ -43,7 +43,7 @@
     boxWrapperClass: 'app-box-wrapper',
     boxMovingClass: 'app-box-moving',
     matrixWrapperClass: 'matrix-wrap',
-    counterClass: 'moviments'
+    counterClass: 'movements'
   };
 
   /**

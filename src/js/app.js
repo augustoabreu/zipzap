@@ -62,6 +62,10 @@
   $public.init = function init(options) {
     console.log('Initializing AppModule');
 
+    Config = Config || zz.cfg;
+    Modal = Modal || zz.modal;
+    Setup = Setup || zz.setup;
+
     difficulty = Config.get('difficulty');
     $wrapper = document.querySelector('.' + Config.getStatic('matrixWrapperClass'));
     $header = document.querySelector('.' + Config.getStatic('app').headerClass);
@@ -90,7 +94,7 @@
    */
   $private.startGame = function startGame() {
     $pr.resetDifficultyBanner();
-    $pr.moviments('reset');
+    $pr.movements('reset');
     $pr.makeMatrix();
     $pr.draw();
   };
@@ -194,7 +198,7 @@
       to.row = from.row;
       to.col = from.col;
 
-      $pr.moviments('add');
+      $pr.movements('add');
       $pr.draw();
       $pr.checkState();
     }
@@ -232,7 +236,7 @@
     Modal.changeToTemplate('confirm', {
       title: 'Parabéns!',
       content: 'Você terminou o jogo com ' +
-                '<strong>' + Config.get('moviments', sessionHash) +
+                '<strong>' + Config.get('movements', sessionHash) +
                 ' movimentos</strong> no <strong>nível ' +
                 (difficulty - 2) + '</strong>.',
       btnConfirmMessage: 'Jogar novamente',
@@ -274,29 +278,32 @@
   };
 
   /**
-   *  @desc add a moviment to counter or clear it
+   *  @desc add a movement to counter or clear it
    */
-  $private.moviments = function moviments(action, num) {
+  $private.movements = function movements(action, num) {
 
     var counter = document.querySelector('.' + Config.getStatic('counterClass')),
-        movs = Config.get('moviments', sessionHash);
+        movs = Config.get('movements', sessionHash);
 
     switch (action) {
 
       case 'add':
         movs = num ? movs + num : movs + 1;
         counter.innerText = movs;
-        Config.set('moviments', movs, true, sessionHash);
+        Config.set('movements', movs, true, sessionHash);
         break;
 
       case 'reset':
-        Config.set('moviments', 0, true, sessionHash);
+        Config.set('movements', 0, true, sessionHash);
         counter.innerText = 0;
         break;
 
     }
   };
 
+  /**
+   *  @desc setup text of the difficulty banner
+   */
   $private.resetDifficultyBanner = function resetDifficultyBanner() {
 
     var elClass = Config.getStatic('app').difficultyNumberClass,
@@ -465,7 +472,7 @@
 
     /**
      *  @desc method called by the main observer to check if
-     *   this box is in range of the mouseup/touchend event
+     *        this box is in range of the mouseup/touchend event
      */
     inRangeOf: function inRangeOf(box) {
       return this.inMyRange(box) && this.pointer;
