@@ -71,7 +71,7 @@
 
   /**
    *  @desc init modal flow
-   *  @param <options> : object - optional
+   *  @param {Object} optins (optional)
    */
   $public.init = function init(options) {
     if (initialized) throw new Error('Modal Module already initialized.');

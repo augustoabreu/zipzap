@@ -255,8 +255,8 @@
 
   /**
    *  @desc check if two boxes are neighbors in all possibilities
-   *  @desc {Box} first
-   *  @desc {Box} second
+   *  @param {Box} first
+   *  @param {Box} second
    */
   $private.areNeighbors = function areNeighbors(first, second) {
     return $pr.checkNeighborhood(first, second) || $pr.checkNeighborhood(second, first);
@@ -264,8 +264,8 @@
 
   /**
    *  @desc check if two boxes are neighbors
-   *  @desc {Box} first
-   *  @desc {Box} second
+   *  @param {Box} first
+   *  @param {Box} second
    */
   $private.checkNeighborhood = function checkNeighborhood(first, second) {
 
@@ -279,6 +279,8 @@
 
   /**
    *  @desc add a movement to counter or clear it
+   *  @param {String} action
+   *  @param {Number} num - optional
    */
   $private.movements = function movements(action, num) {
 
@@ -310,6 +312,18 @@
         $banner = document.querySelector('.' + elClass);
 
     $banner.innerText = difficulty - 2;
+  };
+
+  /**
+   *  @desc get the pointer box
+   *  @return {Box}
+   */
+  $private.getPointer = function getPointer() {
+    var ret = null;
+    $pr.each(function (box) {
+      if (box.pointer) ret = box;
+    });
+    return ret;
   };
 
   /**
@@ -417,9 +431,21 @@
     },
 
     /**
+     * @desc check if this box can move to another place
+     */
+    canMove: function canMove() {
+      return this.observer.areNeighbors(this, this.observer.getPointer());
+    },
+
+    /**
      *  @desc handler for mousedown/touchstart event
      */
     onTouchStart: function onTouchStart(event) {
+      if (!this.canMove()) {
+        return;
+      } else {
+        return this.observer.changePosition(this.observer.getPointer(), this);
+      }
 
       var touch = Config.translateEventPosition(event),
           position = this.getPosition();

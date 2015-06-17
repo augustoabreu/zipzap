@@ -25,7 +25,7 @@ module.exports = function(grunt) {
               'src/js/app.js',
               'src/js/setup.js',
               'src/js/load.js'],
-        dest: 'output/scripts/app.js'
+        dest: 'dist/scripts/app.js'
       }
     },
 
@@ -36,7 +36,7 @@ module.exports = function(grunt) {
           '<%= grunt.template.today("yyyy-mm-dd") %> */\n'
         },
         files: {
-          'output/styles/style.css': 'src/css/style.styl'
+          'dist/styles/style.css': 'src/css/style.styl'
         }
       }
     },
@@ -46,15 +46,15 @@ module.exports = function(grunt) {
         banner: '/*! <%= pkg.name %> <%= grunt.template.today("yyyy-mm-dd") %> */\n'
       },
       build: {
-        src: 'output/scripts/app.js',
-        dest: 'output/scripts/app.min.js'
+        src: 'dist/scripts/app.js',
+        dest: 'dist/scripts/app.min.js'
       }
     },
 
     cssmin: {
       build: {
         files: {
-          'output/styles/style.min.css': 'output/styles/style.css'
+          'dist/styles/style.min.css': 'dist/styles/style.css'
         }
       }
     },
@@ -62,12 +62,12 @@ module.exports = function(grunt) {
     processhtml: {
       dev: {
         files: {
-          'output/index.html': ['src/index.html']
+          'dist/index.html': ['src/index.html']
         }
       },
       prod: {
         files: {
-          'output/index.html': ['src/index.html']
+          'dist/index.html': ['src/index.html']
         }
       }
     },
@@ -81,7 +81,7 @@ module.exports = function(grunt) {
         }
       }
     }
-    
+
   });
 
   // Load the plugin that provides the "uglify" task.
