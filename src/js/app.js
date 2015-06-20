@@ -248,9 +248,7 @@
   };
 
   $private.changeDifficulty = function changeDifficulty() {
-    if (zipzap.setup && zipzap.setup.changeDifficulty) {
-      zipzap.setup.changeDifficulty();
-    }
+    Setup.changeDifficulty();
   };
 
   /**
@@ -438,14 +436,35 @@
     },
 
     /**
-     *  @desc handler for mousedown/touchstart event
+     *  @desc handler for mousedown/touchstart event,
+     *        decides which method will handle the movemente of a tile
+     *  @param {HTMLEvent} event
      */
     onTouchStart: function onTouchStart(event) {
-      if (!this.canMove()) {
-        return;
+      if (!this.canMove()) return;
+
+      var touchStyle = Config.get('touchStyle');
+
+      if (touchStyle === 'click') {
+        this.moveOnClick(event);
       } else {
-        return this.observer.changePosition(this.observer.getPointer(), this);
+        this.moveOnDrag(event);
       }
+    },
+
+    /**
+     *  @desc handle movement when clicked
+     *  @param {HTMLEvent} event
+     */
+    moveOnClick: function moveOnCLick(event) {
+      return this.observer.changePosition(this.observer.getPointer(), this);
+    },
+
+    /**
+     *  @desc handle movement when drag
+     *  @param {HTMLEvent} event
+     */
+    moveOnDrag: function moveOnDrag(event) {
 
       var touch = Config.translateEventPosition(event),
           position = this.getPosition();
@@ -462,6 +481,7 @@
 
     /**
      *  @desc handler for mousemove/touchmove on document
+     *  @param {HTMLEvent} event
      */
     onTouchMove: function onTouchMove(event) {
 
@@ -475,6 +495,7 @@
 
     /**
      *  @desc handler for mouseup/touchend on document
+     *  @param {HTMLEvent} event
      */
     onTouchEnd: function onTouchEnd(event) {
 
@@ -499,6 +520,7 @@
     /**
      *  @desc method called by the main observer to check if
      *        this box is in range of the mouseup/touchend event
+     *  @param {Box} box
      */
     inRangeOf: function inRangeOf(box) {
       return this.inMyRange(box) && this.pointer;
@@ -506,6 +528,7 @@
 
     /**
      *  @desc method encapsulating the logic of inRangeOf method
+     *  @param {Box} box
      */
     inMyRange: function inMyRange(box) {
 

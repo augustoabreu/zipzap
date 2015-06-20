@@ -26,7 +26,8 @@
       headerClass: 'app-header',
       gameContainerClass: 'game-container',
       difficultyChangeClass: 'app-difficulty',
-      difficultyNumberClass: 'app-difficulty-num'
+      difficultyNumberClass: 'app-difficulty-num',
+      menuClass: 'app-menu'
     },
     modal: {
       mainClass: 'app-modal',
@@ -43,13 +44,22 @@
     boxWrapperClass: 'app-box-wrapper',
     boxMovingClass: 'app-box-moving',
     matrixWrapperClass: 'matrix-wrap',
-    counterClass: 'movements'
+    counterClass: 'movements',
+    touchStyles: [{
+      name: 'click',
+      fullName: 'Clicar'
+    }, {
+      name: 'drag',
+      fullName: 'Arrastar'
+    }]
   };
 
   /**
    *  @desc public data
    */
-  $private.data = {};
+  $private.data = {
+    touchStyle: 'drag'
+  };
 
   /**
    *  @desc init load flow

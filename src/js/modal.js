@@ -416,7 +416,11 @@
    *  @return {this}
    */
   $private.setContentModal = function setContentModal(content) {
-    if (content.content) $contentField.innerHTML = content.content;
+    if (content.content && typeof content.content === 'string') {
+      $contentField.innerHTML = content.content;
+    } else {
+      $contentField.appendChild(content.content);
+    }
     if (content.title) $titleField.innerHTML = content.title;
     $pr.configFooter({ hide: true });
     return $public;

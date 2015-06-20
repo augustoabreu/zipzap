@@ -1,4 +1,4 @@
-;(function LoadModule(zz, undefined) {
+ ;(function LoadModule(zz, undefined) {
   'use strict';
 
   /**
@@ -8,6 +8,7 @@
       Config = zz.cfg,
       Setup = zz.setup,
       App = zz.app,
+      Menu = zz.menu,
 
   /**
    *  @desc main object of public methods
@@ -42,6 +43,7 @@
     Config.init();
     Modal.init();
     Setup.init();
+    Menu.init();
   };
 
   /**

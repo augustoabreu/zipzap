@@ -1,8 +1,13 @@
 module.exports = function(grunt) {
 
-  // Project configuration.
+  // Project configuration
   grunt.initConfig({
     pkg: grunt.file.readJSON('package.json'),
+
+    folders: {
+      scripts: 'dist/scripts/',
+      styles: 'dist/styles/'
+    },
 
     jshint: {
       options: {
@@ -17,15 +22,17 @@ module.exports = function(grunt) {
     concat: {
       options: {
         banner: '/*! <%= pkg.name %> - v<%= pkg.version %> - ' +
-        '<%= grunt.template.today("yyyy-mm-dd") %> */\n'
+          '<%= grunt.template.today("yyyy-mm-dd") %> */\n'
       },
       dist: {
         src: ['src/js/config.js',
-              'src/js/modal.js',
-              'src/js/app.js',
-              'src/js/setup.js',
-              'src/js/load.js'],
-        dest: 'dist/scripts/app.js'
+          'src/js/modal.js',
+          'src/js/app.js',
+          'src/js/menu.js',
+          'src/js/setup.js',
+          'src/js/load.js'
+        ],
+        dest: '<%= folders.scripts %>app.js'
       }
     },
 
@@ -33,10 +40,10 @@ module.exports = function(grunt) {
       compile: {
         options: {
           banner: '/*! <%= pkg.name %> - v<%= pkg.version %> - ' +
-          '<%= grunt.template.today("yyyy-mm-dd") %> */\n'
+            '<%= grunt.template.today("yyyy-mm-dd") %> */\n'
         },
         files: {
-          'dist/styles/style.css': 'src/css/style.styl'
+          '<%= folders.styles %>style.css': 'src/css/style.styl'
         }
       }
     },
@@ -46,15 +53,15 @@ module.exports = function(grunt) {
         banner: '/*! <%= pkg.name %> <%= grunt.template.today("yyyy-mm-dd") %> */\n'
       },
       build: {
-        src: 'dist/scripts/app.js',
-        dest: 'dist/scripts/app.min.js'
+        src: '<%= folders.scripts %>app.js',
+        dest: '<%= folders.scripts %>app.min.js'
       }
     },
 
     cssmin: {
       build: {
         files: {
-          'dist/styles/style.min.css': 'dist/styles/style.css'
+          '<%= folders.styles %>style.min.css': '<%= folders.styles %>style.css'
         }
       }
     },
@@ -77,14 +84,27 @@ module.exports = function(grunt) {
         files: ['Gruntfile.js', 'src/js/*.js', 'src/css/*.styl', 'src/*.html'],
         tasks: ['jshint:all', 'concat', 'stylus', 'uglify', 'cssmin', 'processhtml:dev'],
         options: {
-          livereload: true
+          livereload: 35729
+        }
+      }
+    },
+
+    connect: {
+      options: {
+        port: 9009,
+        hostname: '0.0.0.0',
+        livereload: 35729
+      },
+      livereload: {
+        options: {
+          open: true,
+          base: 'dist'
         }
       }
     }
-
   });
 
-  // Load the plugin that provides the "uglify" task.
+  // Load tasks
   grunt.loadNpmTasks('grunt-contrib-uglify');
   grunt.loadNpmTasks('grunt-contrib-stylus');
   grunt.loadNpmTasks('grunt-contrib-concat');
@@ -92,9 +112,11 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-cssmin');
   grunt.loadNpmTasks('grunt-processhtml');
   grunt.loadNpmTasks('grunt-contrib-watch');
+  grunt.loadNpmTasks('grunt-contrib-connect');
 
-  // Default task(s).
+  // Default tasks
   grunt.registerTask('default', ['jshint:all', 'concat', 'stylus', 'uglify', 'cssmin', 'processhtml:dev']);
-  grunt.registerTask('production', ['jshint:all', 'concat','stylus', 'uglify', 'cssmin', 'processhtml:prod']);
+  grunt.registerTask('production', ['jshint:all', 'concat', 'stylus', 'uglify', 'cssmin', 'processhtml:prod']);
+  grunt.registerTask('serve', ['jshint:all', 'concat', 'stylus', 'uglify', 'cssmin', 'processhtml:dev', 'connect:livereload', 'watch']);
 
 };

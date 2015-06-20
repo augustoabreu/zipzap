@@ -1,4 +1,4 @@
-/*! ZipZap - v2.0.0 - 2015-06-17 */
+/*! ZipZap - v2.0.0 - 2015-06-20 */
 ;(function ConfigurationModule(zz, undefined) {
   'use strict';
 
@@ -27,7 +27,8 @@
       headerClass: 'app-header',
       gameContainerClass: 'game-container',
       difficultyChangeClass: 'app-difficulty',
-      difficultyNumberClass: 'app-difficulty-num'
+      difficultyNumberClass: 'app-difficulty-num',
+      menuClass: 'app-menu'
     },
     modal: {
       mainClass: 'app-modal',
@@ -44,13 +45,22 @@
     boxWrapperClass: 'app-box-wrapper',
     boxMovingClass: 'app-box-moving',
     matrixWrapperClass: 'matrix-wrap',
-    counterClass: 'movements'
+    counterClass: 'movements',
+    touchStyles: [{
+      name: 'click',
+      fullName: 'Clicar'
+    }, {
+      name: 'drag',
+      fullName: 'Arrastar'
+    }]
   };
 
   /**
    *  @desc public data
    */
-  $private.data = {};
+  $private.data = {
+    touchStyle: 'drag'
+  };
 
   /**
    *  @desc init load flow
@@ -650,7 +660,11 @@
    *  @return {this}
    */
   $private.setContentModal = function setContentModal(content) {
-    if (content.content) $contentField.innerHTML = content.content;
+    if (content.content && typeof content.content === 'string') {
+      $contentField.innerHTML = content.content;
+    } else {
+      $contentField.appendChild(content.content);
+    }
     if (content.title) $titleField.innerHTML = content.title;
     $pr.configFooter({ hide: true });
     return $public;
@@ -1027,9 +1041,7 @@
   };
 
   $private.changeDifficulty = function changeDifficulty() {
-    if (zipzap.setup && zipzap.setup.changeDifficulty) {
-      zipzap.setup.changeDifficulty();
-    }
+    Setup.changeDifficulty();
   };
 
   /**
@@ -1217,14 +1229,34 @@
     },
 
     /**
-     *  @desc handler for mousedown/touchstart event
+     *  @desc handler for mousedown/touchstart event,
+     *        decides which method will handle the movemente of a tile
+     *  @param {HTMLEvent} event
      */
     onTouchStart: function onTouchStart(event) {
-      if (!this.canMove()) {
-        return;
+      if (!this.canMove()) return;
+      var touchStyle = Config.get('touchStyle');
+
+      if (touchStyle === 'click') {
+        this.moveOnClick(event);
       } else {
-        return this.observer.changePosition(this.observer.getPointer(), this);
+        this.moveOnDrag(event);
       }
+    },
+
+    /**
+     *  @desc handle movement when clicked
+     *  @param {HTMLEvent} event
+     */
+    moveOnClick: function moveOnCLick(event) {
+      return this.observer.changePosition(this.observer.getPointer(), this);
+    },
+
+    /**
+     *  @desc handle movement when drag
+     *  @param {HTMLEvent} event
+     */
+    moveOnDrag: function moveOnDrag(event) {
 
       var touch = Config.translateEventPosition(event),
           position = this.getPosition();
@@ -1241,6 +1273,7 @@
 
     /**
      *  @desc handler for mousemove/touchmove on document
+     *  @param {HTMLEvent} event
      */
     onTouchMove: function onTouchMove(event) {
 
@@ -1254,6 +1287,7 @@
 
     /**
      *  @desc handler for mouseup/touchend on document
+     *  @param {HTMLEvent} event
      */
     onTouchEnd: function onTouchEnd(event) {
 
@@ -1278,6 +1312,7 @@
     /**
      *  @desc method called by the main observer to check if
      *        this box is in range of the mouseup/touchend event
+     *  @param {Box} box
      */
     inRangeOf: function inRangeOf(box) {
       return this.inMyRange(box) && this.pointer;
@@ -1285,6 +1320,7 @@
 
     /**
      *  @desc method encapsulating the logic of inRangeOf method
+     *  @param {Box} box
      */
     inMyRange: function inMyRange(box) {
 
@@ -1302,6 +1338,129 @@
    *  @desc export public methods to main namespace
    */
   zz.app = $public;
+
+}(this.zipzap = this.zipzap || {}));
+
+;(function MenuModule(zz, undefined) {
+  'use strict';
+
+  /**
+   *  @desc instatiating modules
+   */
+  var Config = zz.cfg,
+      Modal = zz.modal,
+
+  /**
+   *  @desc app menu - DOM element
+   */
+      $menu = null,
+
+  /**
+   *  @desc main object of public methods and an alias to it
+   */
+      $public = {},
+      $pu = $public,
+
+  /**
+   *  @desc main object of private methods and an alias to it
+   */
+      $private = {},
+      $pr = $private;
+
+  /**
+   *  @desc init menu module
+   */
+  $public.init = function init() {
+    console.log('Initializing MenuModule');
+
+    $menu = document.querySelector('.' + Config.getStatic('app').menuClass);
+
+    $private.setupEvents();
+  };
+
+  $private.setupEvents = function setupEvents() {
+    $menu.addEventListener('click', $pr.handleClick);
+  };
+
+  $private.handleClick = function handleClick(event) {
+    var menu = event.target.hash.replace('#', '');
+
+    if (menu === 'instruction') $private.openInstructions();
+    if (menu === 'configuration') $private.openConfiguration();
+    if (menu === 'about') $private.openAbout();
+  };
+
+  $private.openInstructions = function openInstructions() {
+    $pr.showModal({
+      title: 'Instruções',
+      content: 'Seu objetivo será movimentar todos os <strong>tiles</strong> (quadrados) ' +
+                'de maneira que fiquem <strong>ordenados</strong> a partir da esquerda ' +
+                'para a direita, linha por linha. ' +
+                'O tile <strong>curinga</strong> deve ficar no canto inferior direito.'
+    });
+  };
+
+  $private.openConfiguration = function openConfiguration() {
+    var styles = Config.getStatic('touchStyles'),
+        $p = document.createElement('p'),
+        $radio, $text, $paragraph, $label;
+
+    $text = '<strong>Selecione o estilo de movimentação: </strong>';
+    $p.innerHTML = $text;
+
+    styles.forEach(function(style) {
+      $radio = document.createElement('input');
+      $radio.type = 'radio';
+      $radio.name = 'touch_style';
+      $radio.id = 'touch_' + style.name;
+      $radio.value = style.name;
+      $radio.checked = style.name === Config.get('touchStyle');
+      $radio.addEventListener('click', $pr.onRadioClick);
+
+      $label = document.createElement('label');
+      $label.setAttribute('for', 'touch_' + style.name);
+
+      $text = document.createTextNode(' ' + style.fullName);
+      $label.appendChild($text);
+
+      $paragraph = document.createElement('p');
+      $paragraph.appendChild($radio);
+      $paragraph.appendChild($label);
+
+      $p.appendChild($paragraph);
+    });
+
+    $pr.showModal({
+      title: 'Configurações',
+      content: $p
+    });
+  };
+
+  $private.onRadioClick = function(event) {
+    var val = event.target.value,
+        types = Config.getStatic('touchStyles'),
+        check = types.some(function(type) {
+          return type.name == val;
+        });
+    if (!check) return;
+    Config.set('touchStyle', val, true);
+  };
+
+  $private.openAbout = function openAbout() {
+    $pr.showModal({
+      title: 'ZipZap',
+      content:  '<p></p>'
+    });
+  };
+
+  $private.showModal = function showModal(content) {
+    Modal.changeToTemplate('modal', content).show();
+  };
+
+  /**
+   *  @desc export public methods to main namespace
+   */
+  zz.menu = $public;
 
 }(this.zipzap = this.zipzap || {}));
 
@@ -1474,7 +1633,9 @@
   $private.configDifficulty = function configDifficulty(options) {
     var str = '';
     for (var i = 2; i < maxDifficulty; i++) {
-      str += '<option value="' + i + '">Nível ' + i + '</option>';
+      str += '<option value="' + i + '"' +
+              (i === previousDifficulty - 2 ? 'selected="selected"' : '') +
+              '>Nível ' + i + '</option>';
     }
     Modal.changeToTemplate('alert', {
       title: options && options.title ? options.title : 'Dificuldade',
@@ -1520,7 +1681,7 @@
 
 }(this.zipzap = this.zipzap || {}));
 
-;(function LoadModule(zz, undefined) {
+ ;(function LoadModule(zz, undefined) {
   'use strict';
 
   /**
@@ -1530,6 +1691,7 @@
       Config = zz.cfg,
       Setup = zz.setup,
       App = zz.app,
+      Menu = zz.menu,
 
   /**
    *  @desc main object of public methods
@@ -1564,6 +1726,7 @@
     Config.init();
     Modal.init();
     Setup.init();
+    Menu.init();
   };
 
   /**

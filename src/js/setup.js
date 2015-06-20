@@ -167,7 +167,9 @@
   $private.configDifficulty = function configDifficulty(options) {
     var str = '';
     for (var i = 2; i < maxDifficulty; i++) {
-      str += '<option value="' + i + '">Nível ' + i + '</option>';
+      str += '<option value="' + i + '"' +
+              (i === previousDifficulty - 2 ? 'selected="selected"' : '') +
+              '>Nível ' + i + '</option>';
     }
     Modal.changeToTemplate('alert', {
       title: options && options.title ? options.title : 'Dificuldade',
