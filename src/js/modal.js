@@ -75,7 +75,6 @@
    */
   $public.init = function init(options) {
     if (initialized) throw new Error('Modal Module already initialized.');
-    console.log('Initializing ModalModule');
 
     var classes = Config.getStatic('modal'),
         modalClass = classes.mainClass,

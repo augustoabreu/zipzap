@@ -60,8 +60,6 @@
    *  @desc init app flow
    */
   $public.init = function init(options) {
-    console.log('Initializing AppModule');
-
     Config = Config || zz.cfg;
     Modal = Modal || zz.modal;
     Setup = Setup || zz.setup;

@@ -28,8 +28,6 @@
    *  @desc init menu module
    */
   $public.init = function init() {
-    console.log('Initializing MenuModule');
-
     $menu = document.querySelector('.' + Config.getStatic('app').menuClass);
 
     $private.setupEvents();

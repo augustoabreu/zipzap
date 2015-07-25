@@ -50,7 +50,6 @@
    *  @desc init setup flow
    */
   $public.init = function() {
-    console.log('Initializing SetupModule');
     $pr.prepare();
     if (allowUserSetup) {
       $pr.initUserSetup();

@@ -65,7 +65,6 @@
    *  @desc init load flow
    */
   $public.init = function init() {
-    console.log('Initializing ConfigurationModule');
     $pu.set('difficulty', 3);
   };
 

@@ -1,4 +1,4 @@
-/*! ZipZap - v2.0.0 - 2015-06-20 */
+/*! ZipZap - v2.0.0 - 2015-07-25 */
 ;(function ConfigurationModule(zz, undefined) {
   'use strict';
 
@@ -66,7 +66,6 @@
    *  @desc init load flow
    */
   $public.init = function init() {
-    console.log('Initializing ConfigurationModule');
     $pu.set('difficulty', 3);
   };
 
@@ -319,7 +318,6 @@
    */
   $public.init = function init(options) {
     if (initialized) throw new Error('Modal Module already initialized.');
-    console.log('Initializing ModalModule');
 
     var classes = Config.getStatic('modal'),
         modalClass = classes.mainClass,
@@ -853,8 +851,6 @@
    *  @desc init app flow
    */
   $public.init = function init(options) {
-    console.log('Initializing AppModule');
-
     Config = Config || zz.cfg;
     Modal = Modal || zz.modal;
     Setup = Setup || zz.setup;
@@ -1235,6 +1231,7 @@
      */
     onTouchStart: function onTouchStart(event) {
       if (!this.canMove()) return;
+
       var touchStyle = Config.get('touchStyle');
 
       if (touchStyle === 'click') {
@@ -1371,17 +1368,22 @@
    *  @desc init menu module
    */
   $public.init = function init() {
-    console.log('Initializing MenuModule');
-
     $menu = document.querySelector('.' + Config.getStatic('app').menuClass);
 
     $private.setupEvents();
   };
 
+  /**
+   *  @desc setup events for Menu Module
+   */
   $private.setupEvents = function setupEvents() {
     $menu.addEventListener('click', $pr.handleClick);
   };
 
+  /**
+   *  @desc method to handle click on menu
+   *  @param {HTMLEvent} event
+   */
   $private.handleClick = function handleClick(event) {
     var menu = event.target.hash.replace('#', '');
 
@@ -1390,6 +1392,9 @@
     if (menu === 'about') $private.openAbout();
   };
 
+  /**
+   *  @desc send instructions data to openModal method
+   */
   $private.openInstructions = function openInstructions() {
     $pr.showModal({
       title: 'Instruções',
@@ -1400,6 +1405,9 @@
     });
   };
 
+  /**
+   *  @desc prepare and send configuration data to openModal method
+   */
   $private.openConfiguration = function openConfiguration() {
     var styles = Config.getStatic('touchStyles'),
         $p = document.createElement('p'),
@@ -1436,7 +1444,12 @@
     });
   };
 
-  $private.onRadioClick = function(event) {
+  /**
+   *  @desc handler for radio button click that changes
+   *        the behaviour of tiles' movements
+   *  @param {HTMLEvent} event
+   */
+  $private.onRadioClick = function onRadioClick(event) {
     var val = event.target.value,
         types = Config.getStatic('touchStyles'),
         check = types.some(function(type) {
@@ -1446,6 +1459,9 @@
     Config.set('touchStyle', val, true);
   };
 
+  /**
+   *  @desc send about data to openModal method
+   */
   $private.openAbout = function openAbout() {
     $pr.showModal({
       title: 'ZipZap',
@@ -1453,6 +1469,10 @@
     });
   };
 
+  /**
+   *  @desc opens modal with data passed by
+   *  @param {Object} content
+   */
   $private.showModal = function showModal(content) {
     Modal.changeToTemplate('modal', content).show();
   };
@@ -1516,7 +1536,6 @@
    *  @desc init setup flow
    */
   $public.init = function() {
-    console.log('Initializing SetupModule');
     $pr.prepare();
     if (allowUserSetup) {
       $pr.initUserSetup();

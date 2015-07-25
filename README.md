@@ -11,6 +11,13 @@ $  npm install
 $  grunt serve
 ```
 
+## TODO
+
+[ ] Implement CommonJS
+[ ] A better menu
+[ ] Ranking
+[ ] Implement A* to solve some levels (maybe)
+
 ## License
 
 The MIT License (MIT)
