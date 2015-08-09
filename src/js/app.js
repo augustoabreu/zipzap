@@ -1,548 +1,540 @@
-;(function AppModule(zz, undefined){
-  'use strict';
+/**
+ *  @desc instatiating modules
+ */
+var Config = require('./config'),
+    Modal = require('./modal'),
+    Setup = require('./setup'),
 
-  /**
-   *  @desc instatiating modules
-   */
-  var Config = zz.cfg,
-      Modal = zz.modal,
-      Setup = zz.setup,
+/**
+ *  @desc main app matrix (square)
+ */
+    matrix = null,
 
-  /**
-   *  @desc main app matrix (square)
-   */
-      matrix = null,
+/**
+ *  @desc game difficulty == matrix side
+ */
+    difficulty = null,
 
-  /**
-   *  @desc game difficulty == matrix side
-   */
-      difficulty = null,
+/**
+ *  @desc matrix wrapper - DOM element
+ */
+    $wrapper = null,
 
-  /**
-   *  @desc matrix wrapper - DOM element
-   */
-      $wrapper = null,
+/**
+ *  @desc app header - DOM element
+ */
+    $header = null,
 
-  /**
-   *  @desc app header - DOM element
-   */
-      $header = null,
+/**
+ *  @desc app wrapper - DOM element
+ */
+    $app = null,
 
-  /**
-   *  @desc app wrapper - DOM element
-   */
-      $app = null,
+/**
+ *  @desc hash for store keys on Config.set()
+ */
+    sessionHash = null,
 
-  /**
-   *  @desc hash for store keys on Config.set()
-   */
-      sessionHash = null,
+/**
+ *  @desc main object of public methods and an alias to it
+ */
+    $public = {},
+    $pu = $public,
 
-  /**
-   *  @desc main object of public methods and an alias to it
-   */
-      $public = {},
-      $pu = $public,
+/**
+ *  @desc main object of private methods and an alias to it
+ */
+    $private = {},
+    $pr = $private,
 
-  /**
-   *  @desc main object of private methods and an alias to it
-   */
-      $private = {},
-      $pr = $private,
+/**
+ *  @desc main object of factories and an alias to it
+ */
+    $factory = {},
+    $fac = $factory;
 
-  /**
-   *  @desc main object of factories and an alias to it
-   */
-      $factory = {},
-      $fac = $factory;
+/**
+ *  @desc init app flow
+ */
+$public.init = function init(options) {
 
-  /**
-   *  @desc init app flow
-   */
-  $public.init = function init(options) {
-    Config = Config || zz.cfg;
-    Modal = Modal || zz.modal;
-    Setup = Setup || zz.setup;
+  difficulty = Config.get('difficulty');
+  $wrapper = document.querySelector('.' + Config.getStatic('matrixWrapperClass'));
+  $header = document.querySelector('.' + Config.getStatic('app').headerClass);
+  $app = document.querySelector('.' + Config.getStatic('app').wrapperClass);
 
-    difficulty = Config.get('difficulty');
-    $wrapper = document.querySelector('.' + Config.getStatic('matrixWrapperClass'));
-    $header = document.querySelector('.' + Config.getStatic('app').headerClass);
-    $app = document.querySelector('.' + Config.getStatic('app').wrapperClass);
+  sessionHash = Math.floor(new Date().getTime()*Math.random()*2).toString();
 
-    sessionHash = Math.floor(new Date().getTime()*Math.random()*2).toString();
+  $wrapper && $pr.prepareMatrix();
+};
 
-    $wrapper && $pr.prepareMatrix();
-  };
+/**
+ *  @desc initialize matrix layout
+ */
+$private.prepareMatrix = function prepareMatrix() {
+  matrix = new Array(difficulty);
 
-  /**
-   *  @desc initialize matrix layout
-   */
-  $private.prepareMatrix = function prepareMatrix() {
-    matrix = new Array(difficulty);
+  for (var i = 0; i < difficulty; i += 1) {
+    matrix[i] = [];
+  }
 
-    for (var i = 0; i < difficulty; i += 1) {
-      matrix[i] = [];
+  $pr.startGame();
+};
+
+/**
+ *  @desc call 2 essencial methods to start a new game
+ */
+$private.startGame = function startGame() {
+  $pr.resetDifficultyBanner();
+  $pr.movements('reset');
+  $pr.makeMatrix();
+  $pr.draw();
+};
+
+/**
+ *  @desc make matrix of difficulty^2 elements
+ */
+$private.makeMatrix = function makeMatrix() {
+
+  var row, col, obj, i, rand,
+      arr = [],
+      len = difficulty * difficulty;
+
+  for (i = 0 ; i < len; i += 1) {
+    row = Math.floor(i / difficulty);
+    col = i % difficulty;
+    obj = {
+      row: row,
+      col: col,
+      observer: $private
+    };
+
+    rand = Math.ceil(Math.random() *  len) - 1;
+
+    if (arr.indexOf(rand) !== -1) {
+      i -= 1;
+      continue;
     }
 
-    $pr.startGame();
-  };
+    arr.push(rand);
+    obj.value = rand;
 
-  /**
-   *  @desc call 2 essencial methods to start a new game
-   */
-  $private.startGame = function startGame() {
-    $pr.resetDifficultyBanner();
-    $pr.movements('reset');
-    $pr.makeMatrix();
+    if (rand === 0) {
+      obj.pointer = true;
+    }
+
+    matrix[row][col] = $fac.Box(obj);
+  }
+};
+
+/**
+ *  @desc draw matrix with DOM elements
+ */
+$private.draw = function draw() {
+
+  var $frag = document.createDocumentFragment();
+
+  $pr.each(function (box){
+    var $boxWrapper = document.createElement('div');
+    $boxWrapper.classList.add(Config.getStatic('boxWrapperClass'));
+    $boxWrapper.appendChild(box.e);
+    $frag.appendChild($boxWrapper);
+  });
+
+  $wrapper.innerHTML = '';
+  $wrapper.appendChild($frag);
+  $app.classList.remove(Config.getStatic('invisibleClass'));
+};
+
+/**
+ *  @desc run matrix array and execute callback on each box
+ *  @param {Function} cb
+ */
+$private.each = function each(cb) {
+  for (var i = 0; i < difficulty; i += 1) {
+
+    for (var j = 0; j < difficulty; j += 1) {
+      cb(matrix[i][j]);
+    }
+
+  }
+};
+
+/**
+ *  @desc fired when a box is droped
+ *  @param {Box} droped
+ */
+$private.notify = function notify(droped) {
+  $pr.each(function(box) {
+    if (box.inRangeOf(droped)) {
+      $pr.changePosition(box, droped);
+    }
+  });
+};
+
+/**
+ *  @desc change position between two boxes
+ *  @param {Box} from
+ *  @param {Box} to
+ */
+$private.changePosition = function changePosition(from, to) {
+  if ($pr.areNeighbors(from, to)) {
+
+    var aux = Object.create(matrix[from.row][from.col]);
+
+    matrix[from.row][from.col] = to;
+    matrix[to.row][to.col] = aux;
+
+    aux.row = to.row;
+    aux.col = to.col;
+    to.row = from.row;
+    to.col = from.col;
+
+    $pr.movements('add');
     $pr.draw();
-  };
+    $pr.checkState();
+  }
+};
 
-  /**
-   *  @desc make matrix of difficulty^2 elements
-   */
-  $private.makeMatrix = function makeMatrix() {
+/**
+ *  @desc check the current state of the game
+ */
+$private.checkState = function checkState() {
 
-    var row, col, obj, i, rand,
-        arr = [],
-        len = difficulty * difficulty;
+  var prev = 0,
+      i, j, box, value;
 
-    for (i = 0 ; i < len; i += 1) {
-      row = Math.floor(i / difficulty);
-      col = i % difficulty;
-      obj = {
-        row: row,
-        col: col,
-        observer: $private
-      };
+  for (i = 0; i < difficulty; i++) {
+    for (j = 0; j < difficulty; j++) {
 
-      rand = Math.ceil(Math.random() *  len) - 1;
+      box = matrix[i][j];
+      value = box.value ? box.value : difficulty * difficulty;
 
-      if (arr.indexOf(rand) !== -1) {
-        i -= 1;
+      if (value > prev) {
+        prev = value;
         continue;
       }
 
-      arr.push(rand);
-      obj.value = rand;
-
-      if (rand === 0) {
-        obj.pointer = true;
-      }
-
-      matrix[row][col] = $fac.Box(obj);
+      return;
     }
-  };
+  }
+  $pr.endGame();
+};
+
+/**
+ *  @desc prepare to end the game and show an message
+ */
+$private.endGame = function endGame() {
+  Modal.changeToTemplate('confirm', {
+    title: 'Parabéns!',
+    content: 'Você terminou o jogo com ' +
+              '<strong>' + Config.get('movements', sessionHash) +
+              ' movimentos</strong> no <strong>nível ' +
+              (difficulty - 2) + '</strong>.',
+    btnConfirmMessage: 'Jogar novamente',
+    confirmCallback: $pr.startGame,
+    btnDeclineMessage: 'Mudar dificuldade',
+    btnDeclineColor: 'green',
+    declineCallback: $pr.changeDifficulty
+  }).show();
+};
+
+$private.changeDifficulty = function changeDifficulty() {
+  Setup.changeDifficulty();
+};
+
+/**
+ *  @desc check if two boxes are neighbors in all possibilities
+ *  @param {Box} first
+ *  @param {Box} second
+ */
+$private.areNeighbors = function areNeighbors(first, second) {
+  return $pr.checkNeighborhood(first, second) || $pr.checkNeighborhood(second, first);
+};
+
+/**
+ *  @desc check if two boxes are neighbors
+ *  @param {Box} first
+ *  @param {Box} second
+ */
+$private.checkNeighborhood = function checkNeighborhood(first, second) {
+
+  var condX = first.col == (second.col - 1) || first.col == (second.col + 1),
+      condY = first.row == second.row,
+      condW = first.row == (second.row - 1) || first.row == (second.row + 1),
+      condZ = first.col == second.col;
+
+  return (condX && condY) || (condW && condZ);
+};
+
+/**
+ *  @desc add a movement to counter or clear it
+ *  @param {String} action
+ *  @param {Number} num - optional
+ */
+$private.movements = function movements(action, num) {
+
+  var counter = document.querySelector('.' + Config.getStatic('counterClass')),
+      movs = Config.get('movements', sessionHash);
+
+  switch (action) {
+
+    case 'add':
+      movs = num ? movs + num : movs + 1;
+      counter.innerText = movs;
+      Config.set('movements', movs, true, sessionHash);
+      break;
+
+    case 'reset':
+      Config.set('movements', 0, true, sessionHash);
+      counter.innerText = 0;
+      break;
+
+  }
+};
+
+/**
+ *  @desc setup text of the difficulty banner
+ */
+$private.resetDifficultyBanner = function resetDifficultyBanner() {
+
+  var elClass = Config.getStatic('app').difficultyNumberClass,
+      $banner = document.querySelector('.' + elClass);
+
+  $banner.innerText = difficulty - 2;
+};
+
+/**
+ *  @desc get the pointer box
+ *  @return {Box}
+ */
+$private.getPointer = function getPointer() {
+  var ret = null;
+  $pr.each(function (box) {
+    if (box.pointer) ret = box;
+  });
+  return ret;
+};
+
+/**
+ *  @desc box factory
+ *  @param {Object} options
+ */
+$factory.Box = function Box(options) {
+  if (!(this instanceof Box)) {
+    return new $factory.Box(options);
+  }
+  this.e = document.createElement('div');
+  this.row = options.row;
+  this.col = options.col;
+  this.observer = options.observer;
+  this.target = null;
+  this.pointer = options.pointer || false;
+  this.value = !isNaN(options.value) ? options.value : null;
+
+  this.init();
+};
+
+$factory.Box.prototype = {
 
   /**
-   *  @desc draw matrix with DOM elements
+   *  @desc helper properties ("varibles")
    */
-  $private.draw = function draw() {
-
-    var $frag = document.createDocumentFragment();
-
-    $pr.each(function (box){
-      var $boxWrapper = document.createElement('div');
-      $boxWrapper.classList.add(Config.getStatic('boxWrapperClass'));
-      $boxWrapper.appendChild(box.e);
-      $frag.appendChild($boxWrapper);
-    });
-
-    $wrapper.innerHTML = '';
-    $wrapper.appendChild($frag);
-    $app.classList.remove(Config.getStatic('invisibleClass'));
-  };
+  dif: null,
+  touchStart: null,
+  touchMove: null,
+  touchEnd: null,
 
   /**
-   *  @desc run matrix array and execute callback on each box
-   *  @param {Function} cb
+   *  @desc method called once to initialize a Box
    */
-  $private.each = function each(cb) {
-    for (var i = 0; i < difficulty; i += 1) {
+  init: function() {
+    this.setupStyle();
+    this.setupContent();
+    this.touchMove = this.onTouchMove.bind(this);
+    this.touchEnd = this.onTouchEnd.bind(this);
+    this.touchStart = this.onTouchStart.bind(this);
+    !this.pointer && this.addStartEvent();
+  },
 
-      for (var j = 0; j < difficulty; j += 1) {
-        cb(matrix[i][j]);
-      }
+  /**
+   *  @desc setup all the style of a Box
+   */
+  setupStyle: function setupStyle() {
 
+    var classlist = this.e.classList;
+
+    classlist.add(Config.getStatic('boxClass'));
+    this.pointer && classlist.add(Config.getStatic('boxPointerClass'));
+  },
+
+  /**
+   *  @desc setup the content of a Box
+   */
+  setupContent: function setupContent() {
+    this.e.innerHTML = this.value;
+  },
+
+  /**
+   *  @desc return position of the Box relative to window
+   *  @return {Object}
+   */
+  getPosition: function getPosition() {
+    return {
+      x: parseFloat(this.e.offsetLeft),
+      y: parseFloat(this.e.offsetTop)
+    };
+  },
+
+  /**
+   *  @desc return width and height
+   *  @return {Object}
+   */
+  getBounds: function getBounds() {
+    return {
+      width: this.e.offsetWidth,
+      height: this.e.offsetHeight
+    };
+  },
+
+  /**
+   *  @desc add mousedown/touchstart event to HTMLElement
+   */
+  addStartEvent: function addEvents() {
+    this.e.addEventListener(Config.EventType.touchstart, this.touchStart);
+  },
+
+  /**
+   *  @desc add mousemove/touchmove and mouseup/touchend event to document
+   */
+  addMovingEvents: function addMovingEvents() {
+    document.addEventListener(Config.EventType.touchmove, this.touchMove);
+    document.addEventListener(Config.EventType.touchend, this.touchEnd);
+  },
+
+  /**
+   *  @desc remove mousemove/touchmove and mouseup/touchend event from document
+   */
+  removeEvents: function removeEvents() {
+    document.removeEventListener(Config.EventType.touchmove, this.touchMove);
+    document.removeEventListener(Config.EventType.touchend, this.touchEnd);
+  },
+
+  /**
+   * @desc check if this box can move to another place
+   */
+  canMove: function canMove() {
+    return this.observer.areNeighbors(this, this.observer.getPointer());
+  },
+
+  /**
+   *  @desc handler for mousedown/touchstart event,
+   *        decides which method will handle the movemente of a tile
+   *  @param {HTMLEvent} event
+   */
+  onTouchStart: function onTouchStart(event) {
+    if (!this.canMove()) return;
+
+    var touchStyle = Config.get('touchStyle');
+
+    if (touchStyle === 'click') {
+      this.moveOnClick(event);
+    } else {
+      this.moveOnDrag(event);
     }
-  };
+  },
 
   /**
-   *  @desc fired when a box is droped
-   *  @param {Box} droped
+   *  @desc handle movement when clicked
+   *  @param {HTMLEvent} event
    */
-  $private.notify = function notify(droped) {
-    $pr.each(function(box) {
-      if (box.inRangeOf(droped)) {
-        $pr.changePosition(box, droped);
-      }
-    });
-  };
+  moveOnClick: function moveOnCLick(event) {
+    return this.observer.changePosition(this.observer.getPointer(), this);
+  },
 
   /**
-   *  @desc change position between two boxes
-   *  @param {Box} from
-   *  @param {Box} to
+   *  @desc handle movement when drag
+   *  @param {HTMLEvent} event
    */
-  $private.changePosition = function changePosition(from, to) {
-    if ($pr.areNeighbors(from, to)) {
+  moveOnDrag: function moveOnDrag(event) {
 
-      var aux = Object.create(matrix[from.row][from.col]);
+    var touch = Config.translateEventPosition(event),
+        position = this.getPosition();
 
-      matrix[from.row][from.col] = to;
-      matrix[to.row][to.col] = aux;
+    event.preventDefault();
 
-      aux.row = to.row;
-      aux.col = to.col;
-      to.row = from.row;
-      to.col = from.col;
-
-      $pr.movements('add');
-      $pr.draw();
-      $pr.checkState();
-    }
-  };
+    this.dif = {
+      x: touch.x - position.x,
+      y: touch.y - position.y
+    };
+    this.e.classList.add(Config.getStatic('boxMovingClass'));
+    this.addMovingEvents();
+  },
 
   /**
-   *  @desc check the current state of the game
+   *  @desc handler for mousemove/touchmove on document
+   *  @param {HTMLEvent} event
    */
-  $private.checkState = function checkState() {
+  onTouchMove: function onTouchMove(event) {
 
-    var prev = 0,
-        i, j, box, value;
+    var touch = Config.translateEventPosition(event),
+        style = this.e.style;
 
-    for (i = 0; i < difficulty; i++) {
-      for (j = 0; j < difficulty; j++) {
-
-        box = matrix[i][j];
-        value = box.value ? box.value : difficulty * difficulty;
-
-        if (value > prev) {
-          prev = value;
-          continue;
-        }
-
-        return;
-      }
-    }
-    $pr.endGame();
-  };
+    event.preventDefault();
+    style.top = (touch.y - this.dif.y) + 'px';
+    style.left = (touch.x - this.dif.x) + 'px';
+  },
 
   /**
-   *  @desc prepare to end the game and show an message
+   *  @desc handler for mouseup/touchend on document
+   *  @param {HTMLEvent} event
    */
-  $private.endGame = function endGame() {
-    Modal.changeToTemplate('confirm', {
-      title: 'Parabéns!',
-      content: 'Você terminou o jogo com ' +
-                '<strong>' + Config.get('movements', sessionHash) +
-                ' movimentos</strong> no <strong>nível ' +
-                (difficulty - 2) + '</strong>.',
-      btnConfirmMessage: 'Jogar novamente',
-      confirmCallback: $pr.startGame,
-      btnDeclineMessage: 'Mudar dificuldade',
-      btnDeclineColor: 'green',
-      declineCallback: $pr.changeDifficulty
-    }).show();
-  };
+  onTouchEnd: function onTouchEnd(event) {
 
-  $private.changeDifficulty = function changeDifficulty() {
-    Setup.changeDifficulty();
-  };
+    var touch = Config.translateEventPosition(event),
+        style = this.e.style;
+
+    event.preventDefault();
+
+    this.target = {
+      x: parseInt(touch.x),
+      y: parseInt(touch.y)
+    };
+    this.e.classList.remove(Config.getStatic('boxMovingClass'));
+
+    style.top = '';
+    style.left = '';
+
+    this.removeEvents();
+    this.observer.notify(this);
+  },
 
   /**
-   *  @desc check if two boxes are neighbors in all possibilities
-   *  @param {Box} first
-   *  @param {Box} second
+   *  @desc method called by the main observer to check if
+   *        this box is in range of the mouseup/touchend event
+   *  @param {Box} box
    */
-  $private.areNeighbors = function areNeighbors(first, second) {
-    return $pr.checkNeighborhood(first, second) || $pr.checkNeighborhood(second, first);
-  };
+  inRangeOf: function inRangeOf(box) {
+    return this.inMyRange(box) && this.pointer;
+  },
 
   /**
-   *  @desc check if two boxes are neighbors
-   *  @param {Box} first
-   *  @param {Box} second
+   *  @desc method encapsulating the logic of inRangeOf method
+   *  @param {Box} box
    */
-  $private.checkNeighborhood = function checkNeighborhood(first, second) {
+  inMyRange: function inMyRange(box) {
 
-    var condX = first.col == (second.col - 1) || first.col == (second.col + 1),
-        condY = first.row == second.row,
-        condW = first.row == (second.row - 1) || first.row == (second.row + 1),
-        condZ = first.col == second.col;
+    var target = box.target,
+        pos = this.getPosition(),
+        bounds = this.getBounds(),
+        ax = pos.x <= target.x && target.x <= (pos.x + bounds.width),
+        ay = pos.y <= target.y && target.y <= (pos.y + bounds.height);
 
-    return (condX && condY) || (condW && condZ);
-  };
+    return ax && ay;
+  }
+};
 
-  /**
-   *  @desc add a movement to counter or clear it
-   *  @param {String} action
-   *  @param {Number} num - optional
-   */
-  $private.movements = function movements(action, num) {
-
-    var counter = document.querySelector('.' + Config.getStatic('counterClass')),
-        movs = Config.get('movements', sessionHash);
-
-    switch (action) {
-
-      case 'add':
-        movs = num ? movs + num : movs + 1;
-        counter.innerText = movs;
-        Config.set('movements', movs, true, sessionHash);
-        break;
-
-      case 'reset':
-        Config.set('movements', 0, true, sessionHash);
-        counter.innerText = 0;
-        break;
-
-    }
-  };
-
-  /**
-   *  @desc setup text of the difficulty banner
-   */
-  $private.resetDifficultyBanner = function resetDifficultyBanner() {
-
-    var elClass = Config.getStatic('app').difficultyNumberClass,
-        $banner = document.querySelector('.' + elClass);
-
-    $banner.innerText = difficulty - 2;
-  };
-
-  /**
-   *  @desc get the pointer box
-   *  @return {Box}
-   */
-  $private.getPointer = function getPointer() {
-    var ret = null;
-    $pr.each(function (box) {
-      if (box.pointer) ret = box;
-    });
-    return ret;
-  };
-
-  /**
-   *  @desc box factory
-   *  @param {Object} options
-   */
-  $factory.Box = function Box(options) {
-    if (!(this instanceof Box)) {
-      return new $factory.Box(options);
-    }
-    this.e = document.createElement('div');
-    this.row = options.row;
-    this.col = options.col;
-    this.observer = options.observer;
-    this.target = null;
-    this.pointer = options.pointer || false;
-    this.value = !isNaN(options.value) ? options.value : null;
-
-    this.init();
-  };
-
-  $factory.Box.prototype = {
-
-    /**
-     *  @desc helper properties ("varibles")
-     */
-    dif: null,
-    touchStart: null,
-    touchMove: null,
-    touchEnd: null,
-
-    /**
-     *  @desc method called once to initialize a Box
-     */
-    init: function() {
-      this.setupStyle();
-      this.setupContent();
-      this.touchMove = this.onTouchMove.bind(this);
-      this.touchEnd = this.onTouchEnd.bind(this);
-      this.touchStart = this.onTouchStart.bind(this);
-      !this.pointer && this.addStartEvent();
-    },
-
-    /**
-     *  @desc setup all the style of a Box
-     */
-    setupStyle: function setupStyle() {
-
-      var classlist = this.e.classList;
-
-      classlist.add(Config.getStatic('boxClass'));
-      this.pointer && classlist.add(Config.getStatic('boxPointerClass'));
-    },
-
-    /**
-     *  @desc setup the content of a Box
-     */
-    setupContent: function setupContent() {
-      this.e.innerHTML = this.value;
-    },
-
-    /**
-     *  @desc return position of the Box relative to window
-     *  @return {Object}
-     */
-    getPosition: function getPosition() {
-      return {
-        x: parseFloat(this.e.offsetLeft),
-        y: parseFloat(this.e.offsetTop)
-      };
-    },
-
-    /**
-     *  @desc return width and height
-     *  @return {Object}
-     */
-    getBounds: function getBounds() {
-      return {
-        width: this.e.offsetWidth,
-        height: this.e.offsetHeight
-      };
-    },
-
-    /**
-     *  @desc add mousedown/touchstart event to HTMLElement
-     */
-    addStartEvent: function addEvents() {
-      this.e.addEventListener(Config.EventType.touchstart, this.touchStart);
-    },
-
-    /**
-     *  @desc add mousemove/touchmove and mouseup/touchend event to document
-     */
-    addMovingEvents: function addMovingEvents() {
-      document.addEventListener(Config.EventType.touchmove, this.touchMove);
-      document.addEventListener(Config.EventType.touchend, this.touchEnd);
-    },
-
-    /**
-     *  @desc remove mousemove/touchmove and mouseup/touchend event from document
-     */
-    removeEvents: function removeEvents() {
-      document.removeEventListener(Config.EventType.touchmove, this.touchMove);
-      document.removeEventListener(Config.EventType.touchend, this.touchEnd);
-    },
-
-    /**
-     * @desc check if this box can move to another place
-     */
-    canMove: function canMove() {
-      return this.observer.areNeighbors(this, this.observer.getPointer());
-    },
-
-    /**
-     *  @desc handler for mousedown/touchstart event,
-     *        decides which method will handle the movemente of a tile
-     *  @param {HTMLEvent} event
-     */
-    onTouchStart: function onTouchStart(event) {
-      if (!this.canMove()) return;
-
-      var touchStyle = Config.get('touchStyle');
-
-      if (touchStyle === 'click') {
-        this.moveOnClick(event);
-      } else {
-        this.moveOnDrag(event);
-      }
-    },
-
-    /**
-     *  @desc handle movement when clicked
-     *  @param {HTMLEvent} event
-     */
-    moveOnClick: function moveOnCLick(event) {
-      return this.observer.changePosition(this.observer.getPointer(), this);
-    },
-
-    /**
-     *  @desc handle movement when drag
-     *  @param {HTMLEvent} event
-     */
-    moveOnDrag: function moveOnDrag(event) {
-
-      var touch = Config.translateEventPosition(event),
-          position = this.getPosition();
-
-      event.preventDefault();
-
-      this.dif = {
-        x: touch.x - position.x,
-        y: touch.y - position.y
-      };
-      this.e.classList.add(Config.getStatic('boxMovingClass'));
-      this.addMovingEvents();
-    },
-
-    /**
-     *  @desc handler for mousemove/touchmove on document
-     *  @param {HTMLEvent} event
-     */
-    onTouchMove: function onTouchMove(event) {
-
-      var touch = Config.translateEventPosition(event),
-          style = this.e.style;
-
-      event.preventDefault();
-      style.top = (touch.y - this.dif.y) + 'px';
-      style.left = (touch.x - this.dif.x) + 'px';
-    },
-
-    /**
-     *  @desc handler for mouseup/touchend on document
-     *  @param {HTMLEvent} event
-     */
-    onTouchEnd: function onTouchEnd(event) {
-
-      var touch = Config.translateEventPosition(event),
-          style = this.e.style;
-
-      event.preventDefault();
-
-      this.target = {
-        x: parseInt(touch.x),
-        y: parseInt(touch.y)
-      };
-      this.e.classList.remove(Config.getStatic('boxMovingClass'));
-
-      style.top = '';
-      style.left = '';
-
-      this.removeEvents();
-      this.observer.notify(this);
-    },
-
-    /**
-     *  @desc method called by the main observer to check if
-     *        this box is in range of the mouseup/touchend event
-     *  @param {Box} box
-     */
-    inRangeOf: function inRangeOf(box) {
-      return this.inMyRange(box) && this.pointer;
-    },
-
-    /**
-     *  @desc method encapsulating the logic of inRangeOf method
-     *  @param {Box} box
-     */
-    inMyRange: function inMyRange(box) {
-
-      var target = box.target,
-          pos = this.getPosition(),
-          bounds = this.getBounds(),
-          ax = pos.x <= target.x && target.x <= (pos.x + bounds.width),
-          ay = pos.y <= target.y && target.y <= (pos.y + bounds.height);
-
-      return ax && ay;
-    }
-  };
-
-  /**
-   *  @desc export public methods to main namespace
-   */
-  zz.app = $public;
-
-}(this.zipzap = this.zipzap || {}));
+/**
+ *  @desc export public methods to main namespace
+ */
+module.exports = $public;

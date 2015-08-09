@@ -5,34 +5,35 @@ module.exports = function(grunt) {
     pkg: grunt.file.readJSON('package.json'),
 
     folders: {
-      scripts: 'dist/scripts/',
-      styles: 'dist/styles/'
+      scripts: 'dist/scripts',
+      styles: 'dist/styles'
     },
 
     jshint: {
       options: {
         globals: {
-          'zipzap': true
+          'window': true,
+          'document': true,
+          'module': true,
+          'zipzap': true,
+          'require': true,
+          'localStorage': true
         },
         expr: true
       },
       all: 'src/js/*.js'
     },
 
-    concat: {
-      options: {
-        banner: '/*! <%= pkg.name %> - v<%= pkg.version %> - ' +
-          '<%= grunt.template.today("yyyy-mm-dd") %> */\n'
-      },
+    clean: {
+      js: ['<%= folders.scripts %>/*.js'],
+      css: ['<%= folders.styles %>/*.css']
+    },
+
+    browserify: {
       dist: {
-        src: ['src/js/config.js',
-          'src/js/modal.js',
-          'src/js/app.js',
-          'src/js/menu.js',
-          'src/js/setup.js',
-          'src/js/load.js'
-        ],
-        dest: '<%= folders.scripts %>app.js'
+        files: {
+          '<%= folders.scripts %>/main.js': 'src/js/load.js'
+        }
       }
     },
 
@@ -43,7 +44,7 @@ module.exports = function(grunt) {
             '<%= grunt.template.today("yyyy-mm-dd") %> */\n'
         },
         files: {
-          '<%= folders.styles %>style.css': 'src/css/style.styl'
+          '<%= folders.styles %>/style.css': 'src/css/style.styl'
         }
       }
     },
@@ -53,15 +54,15 @@ module.exports = function(grunt) {
         banner: '/*! <%= pkg.name %> <%= grunt.template.today("yyyy-mm-dd") %> */\n'
       },
       build: {
-        src: '<%= folders.scripts %>app.js',
-        dest: '<%= folders.scripts %>app.min.js'
+        src: '<%= folders.scripts %>/main.js',
+        dest: '<%= folders.scripts %>/main.min.js'
       }
     },
 
     cssmin: {
       build: {
         files: {
-          '<%= folders.styles %>style.min.css': '<%= folders.styles %>style.css'
+          '<%= folders.styles %>/style.min.css': '<%= folders.styles %>/style.css'
         }
       }
     },
@@ -107,16 +108,17 @@ module.exports = function(grunt) {
   // Load tasks
   grunt.loadNpmTasks('grunt-contrib-uglify');
   grunt.loadNpmTasks('grunt-contrib-stylus');
-  grunt.loadNpmTasks('grunt-contrib-concat');
   grunt.loadNpmTasks('grunt-contrib-jshint');
   grunt.loadNpmTasks('grunt-contrib-cssmin');
   grunt.loadNpmTasks('grunt-processhtml');
   grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-contrib-connect');
+  grunt.loadNpmTasks('grunt-browserify');
+  grunt.loadNpmTasks('grunt-contrib-clean');
 
   // Default tasks
-  grunt.registerTask('default', ['jshint:all', 'concat', 'stylus', 'uglify', 'cssmin', 'processhtml:dev']);
-  grunt.registerTask('production', ['jshint:all', 'concat', 'stylus', 'uglify', 'cssmin', 'processhtml:prod']);
-  grunt.registerTask('serve', ['jshint:all', 'concat', 'stylus', 'uglify', 'cssmin', 'processhtml:dev', 'connect:livereload', 'watch']);
+  grunt.registerTask('default', ['jshint:all', 'clean:js', 'browserify', 'clean:css', 'stylus', 'uglify', 'cssmin', 'processhtml:dev']);
+  grunt.registerTask('production', ['jshint:all', 'clean:js', 'browserify', 'clean:css', 'stylus', 'uglify', 'cssmin', 'processhtml:prod']);
+  grunt.registerTask('serve', ['jshint:all', 'clean:js', 'browserify', 'clean:css', 'stylus', 'uglify', 'cssmin', 'processhtml:dev', 'connect:livereload', 'watch']);
 
 };
