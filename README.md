@@ -13,7 +13,7 @@ $  grunt serve
 
 ## TODO
 
-- [ ] Implement CommonJS
+- [x] Implement CommonJS
 - [ ] A better menu
 - [ ] Ranking
 - [ ] Implement A* to solve some levels (maybe)
